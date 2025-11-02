@@ -135,7 +135,7 @@ return [
     ],
 
     'flush' => [
-        //
+        'debugbar',
     ],
 
     /*
