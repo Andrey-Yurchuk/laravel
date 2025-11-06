@@ -9,8 +9,6 @@ services:
       - "${APP_PORT:-8888}:80"
     volumes:
       - .:/var/www/html
-      - vendor:/var/www/html/vendor
-      - node_modules:/var/www/html/node_modules
       - ./storage:/var/www/html/storage
     env_file:
       - .env
@@ -60,10 +58,6 @@ volumes:
   postgres-data:
     driver: local
   redis-data:
-    driver: local
-  vendor:
-    driver: local
-  node_modules:
     driver: local
 
 networks:
