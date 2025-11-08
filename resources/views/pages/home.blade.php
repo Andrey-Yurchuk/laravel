@@ -17,7 +17,7 @@
                     <a href="{{ route('register') }}" class="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition text-lg">
                         Начать обучение
                     </a>
-                    <a href="#" class="bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-800 transition text-lg border-2 border-white">
+                    <a href="{{ route('register') }}" class="bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-800 transition text-lg border-2 border-white">
                         Стать преподавателем
                     </a>
                 </div>
