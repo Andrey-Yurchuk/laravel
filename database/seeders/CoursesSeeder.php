@@ -24,15 +24,17 @@ class CoursesSeeder extends Seeder
 
             $categoryId = DB::table('categories')->where('slug', 'programming')->value('id');
 
+            $programmingCategoryId = $categoryId ?? DB::table('categories')->insertGetId([
+                'name' => 'Programming',
+                'slug' => 'programming',
+                'description' => 'Courses about coding and software development.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
             $courseId = DB::table('courses')->insertGetId([
                 'instructor_id' => $instructorId,
-                'category_id' => $categoryId ?? DB::table('categories')->insertGetId([
-                    'name' => 'Programming',
-                    'slug' => 'programming',
-                    'description' => 'Courses about coding and software development.',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]),
+                'category_id' => $programmingCategoryId,
                 'title' => 'Laravel From Scratch',
                 'slug' => 'laravel-from-scratch',
                 'description' => 'Learn Laravel by building a real SaaS platform step-by-step.',
