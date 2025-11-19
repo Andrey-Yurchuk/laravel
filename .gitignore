@@ -18,7 +18,14 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/debugbar
 /vendor
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+**/caddy
+!docker/caddy/
+frankenphp
+!docker/frankenphp/
+frankenphp-worker.php

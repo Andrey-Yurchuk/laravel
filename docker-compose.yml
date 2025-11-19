@@ -1,0 +1,66 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/frankenphp/Dockerfile
+    container_name: laravel-app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8888}:80"
+    volumes:
+      - .:/var/www/html
+      - ./storage:/var/www/html/storage
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - laravel-network
+
+  postgres:
+    image: postgres:18-alpine
+    container_name: laravel-postgres
+    restart: unless-stopped
+    ports:
+      - "${DB_EXTERNAL_PORT:-5435}:5432"
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${DB_DATABASE}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - laravel-network
+
+  redis:
+    image: redis:8-alpine
+    container_name: laravel-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_EXTERNAL_PORT:-6382}:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - laravel-network
+
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+
+networks:
+  laravel-network:
+    driver: bridge
+
