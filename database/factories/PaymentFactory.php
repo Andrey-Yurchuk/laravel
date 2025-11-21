@@ -11,9 +11,12 @@ class PaymentFactory extends Factory
 {
     public function definition(): array
     {
+        /** @var \Database\Factories\UserFactory $userFactory */
+        $userFactory = User::factory();
+
         return [
             'subscription_id' => Subscription::factory(),
-            'user_id' => User::factory()->student(),
+            'user_id' => $userFactory->student(),
             'amount' => fake()->randomFloat(2, 10, 100),
             'status' => PaymentStatus::Pending,
             'transaction_id' => null,

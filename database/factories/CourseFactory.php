@@ -14,9 +14,12 @@ class CourseFactory extends Factory
     public function definition(): array
     {
         $title = fake()->sentence(3);
-        
+
+        /** @var \Database\Factories\UserFactory $userFactory */
+        $userFactory = User::factory();
+
         return [
-            'instructor_id' => User::factory()->instructor(),
+            'instructor_id' => $userFactory->instructor(),
             'category_id' => Category::factory(),
             'title' => rtrim($title, '.'),
             'slug' => Str::slug($title),

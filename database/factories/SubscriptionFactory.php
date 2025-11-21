@@ -12,8 +12,11 @@ class SubscriptionFactory extends Factory
 {
     public function definition(): array
     {
+        /** @var \Database\Factories\UserFactory $userFactory */
+        $userFactory = User::factory();
+
         return [
-            'user_id' => User::factory()->student(),
+            'user_id' => $userFactory->student(),
             'course_id' => Course::factory(),
             'plan_id' => CoursePlan::factory(),
             'status' => SubscriptionStatus::Pending,

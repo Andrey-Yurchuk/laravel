@@ -9,4 +9,3 @@ enum SubscriptionStatus: string
     case Cancelled = 'cancelled';
     case Expired = 'expired';
 }
-

@@ -8,4 +8,3 @@ enum CourseStatus: string
     case Published = 'published';
     case Archived = 'archived';
 }
-

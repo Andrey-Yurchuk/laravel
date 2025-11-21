@@ -8,4 +8,3 @@ enum CourseDifficulty: string
     case Intermediate = 'intermediate';
     case Advanced = 'advanced';
 }
-
