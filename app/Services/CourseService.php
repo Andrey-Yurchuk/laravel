@@ -15,7 +15,8 @@ class CourseService implements CourseServiceInterface
 {
     public function __construct(
         private CourseRepositoryInterface $repository
-    ) {}
+    ) {
+    }
 
     public function getAll(int $perPage = 15): LengthAwarePaginator
     {
@@ -30,7 +31,7 @@ class CourseService implements CourseServiceInterface
     public function create(CourseDTO $dto): Course
     {
         $data = $dto->toArray();
-        
+
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['title']);
         }
@@ -41,7 +42,7 @@ class CourseService implements CourseServiceInterface
     public function update(int $id, CourseDTO $dto): Course
     {
         $data = $dto->toArray();
-        
+
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['title']);
         }
@@ -78,4 +79,3 @@ class CourseService implements CourseServiceInterface
         return $this->repository->getInstructors();
     }
 }
-

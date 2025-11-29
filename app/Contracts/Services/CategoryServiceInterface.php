@@ -20,4 +20,3 @@ interface CategoryServiceInterface
 
     public function count(): int;
 }
-

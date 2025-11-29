@@ -29,7 +29,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 // Admin routes
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('dashboard');
-    
+
     Route::resource('categories', CategoryController::class);
     Route::resource('courses', CourseController::class);
 });

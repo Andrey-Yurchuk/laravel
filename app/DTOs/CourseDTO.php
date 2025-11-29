@@ -12,7 +12,8 @@ class CourseDTO
         public readonly string $description,
         public readonly string $difficultyLevel,
         public readonly string $status,
-    ) {}
+    ) {
+    }
 
     public static function fromArray(array $data): self
     {
@@ -40,4 +41,3 @@ class CourseDTO
         ];
     }
 }
-

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Enums\UserRole;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
@@ -10,7 +11,9 @@ class StoreCategoryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return Auth::check() && Auth::user()?->role === UserRole::Admin;
+        /** @var User|null $user */
+        $user = Auth::user();
+        return Auth::check() && $user && $user->role === UserRole::Admin;
     }
 
     public function rules(): array

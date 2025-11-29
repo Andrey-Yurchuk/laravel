@@ -8,7 +8,8 @@ class CategoryDTO
         public readonly string $name,
         public readonly string $slug,
         public readonly ?string $description = null,
-    ) {}
+    ) {
+    }
 
     public static function fromArray(array $data): self
     {
@@ -28,4 +29,3 @@ class CategoryDTO
         ], fn($value) => $value !== null);
     }
 }
-

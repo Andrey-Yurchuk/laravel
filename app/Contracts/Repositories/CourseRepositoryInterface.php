@@ -29,4 +29,3 @@ interface CourseRepositoryInterface
 
     public function getInstructors(): Collection;
 }
-

@@ -8,19 +8,20 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreCategoryRequest;
 use App\Http\Requests\Admin\UpdateCategoryRequest;
 use Exception;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
     public function __construct(
         private CategoryServiceInterface $categoryService
-    ) {}
+    ) {
+    }
 
     public function index(): View
     {
         $categories = $this->categoryService->getAll();
-        
+
         return view('admin.categories.index', compact('categories'));
     }
 
@@ -32,7 +33,7 @@ class CategoryController extends Controller
     public function store(StoreCategoryRequest $request): RedirectResponse
     {
         $dto = CategoryDTO::fromArray($request->validated());
-        
+
         try {
             $this->categoryService->create($dto);
             return redirect()->route('admin.categories.index')
@@ -47,21 +48,21 @@ class CategoryController extends Controller
     public function show(int $id): View
     {
         $category = $this->categoryService->getById($id);
-        
+
         return view('admin.categories.show', compact('category'));
     }
 
     public function edit(int $id): View
     {
         $category = $this->categoryService->getById($id);
-        
+
         return view('admin.categories.edit', compact('category'));
     }
 
     public function update(UpdateCategoryRequest $request, int $id): RedirectResponse
     {
         $dto = CategoryDTO::fromArray($request->validated());
-        
+
         try {
             $this->categoryService->update($id, $dto);
             return redirect()->route('admin.categories.index')

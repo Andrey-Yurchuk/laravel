@@ -14,7 +14,8 @@ class CategoryService implements CategoryServiceInterface
 {
     public function __construct(
         private CategoryRepositoryInterface $repository
-    ) {}
+    ) {
+    }
 
     public function getAll(): Collection
     {
@@ -29,7 +30,7 @@ class CategoryService implements CategoryServiceInterface
     public function create(CategoryDTO $dto): Category
     {
         $data = $dto->toArray();
-        
+
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
         }
@@ -40,7 +41,7 @@ class CategoryService implements CategoryServiceInterface
     public function update(int $id, CategoryDTO $dto): Category
     {
         $data = $dto->toArray();
-        
+
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
         }
@@ -62,4 +63,3 @@ class CategoryService implements CategoryServiceInterface
         return $this->repository->count();
     }
 }
-

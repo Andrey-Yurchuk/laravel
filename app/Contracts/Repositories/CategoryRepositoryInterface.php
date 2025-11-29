@@ -21,4 +21,3 @@ interface CategoryRepositoryInterface
 
     public function count(): int;
 }
-

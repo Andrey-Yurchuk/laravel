@@ -10,17 +10,29 @@ class CategoryRepository implements CategoryRepositoryInterface
 {
     public function getAll(): Collection
     {
-        return Category::orderBy('created_at', 'desc')->get();
+        /** @var \Illuminate\Database\Eloquent\Builder<Category> $query */
+        $query = Category::query();
+        /** @var Collection<int, Category> $result */
+        $result = $query->orderBy('created_at', 'desc')->get();
+        return $result;
     }
 
     public function getById(int $id): Category
     {
-        return Category::findOrFail($id);
+        /** @var \Illuminate\Database\Eloquent\Builder<Category> $query */
+        $query = Category::query();
+        /** @var Category $result */
+        $result = $query->findOrFail($id);
+        return $result;
     }
 
     public function create(array $data): Category
     {
-        return Category::create($data);
+        /** @var \Illuminate\Database\Eloquent\Builder<Category> $query */
+        $query = Category::query();
+        /** @var Category $result */
+        $result = $query->create($data);
+        return $result;
     }
 
     public function update(int $id, array $data): Category
@@ -38,14 +50,17 @@ class CategoryRepository implements CategoryRepositoryInterface
 
     public function hasCourses(int $id): bool
     {
-        return Category::where('id', $id)
+        /** @var \Illuminate\Database\Eloquent\Builder $query */
+        $query = Category::query();
+        return $query->where('id', $id)
             ->whereHas('courses')
             ->exists();
     }
 
     public function count(): int
     {
-        return Category::count();
+        /** @var \Illuminate\Database\Eloquent\Builder $query */
+        $query = Category::query();
+        return $query->count();
     }
 }
-

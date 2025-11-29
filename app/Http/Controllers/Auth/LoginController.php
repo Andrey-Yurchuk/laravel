@@ -5,9 +5,10 @@ namespace App\Http\Controllers\Auth;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 
 class LoginController extends Controller
 {
@@ -23,7 +24,9 @@ class LoginController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            if (Auth::user()?->role === UserRole::Admin) {
+            /** @var User|null $user */
+            $user = Auth::user();
+            if ($user && $user->role === UserRole::Admin) {
                 return redirect()->intended(route('admin.dashboard'));
             }
 

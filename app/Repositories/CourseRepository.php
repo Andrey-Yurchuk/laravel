@@ -14,20 +14,30 @@ class CourseRepository implements CourseRepositoryInterface
 {
     public function getAll(int $perPage = 15): LengthAwarePaginator
     {
-        return Course::with(['category', 'instructor'])
+        /** @var \Illuminate\Database\Eloquent\Builder $query */
+        $query = Course::query();
+        return $query->with(['category', 'instructor'])
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
     }
 
     public function getById(int $id): Course
     {
-        return Course::with(['category', 'instructor', 'lessons'])
+        /** @var \Illuminate\Database\Eloquent\Builder<Course> $query */
+        $query = Course::query();
+        /** @var Course $result */
+        $result = $query->with(['category', 'instructor', 'lessons'])
             ->findOrFail($id);
+        return $result;
     }
 
     public function create(array $data): Course
     {
-        return Course::create($data);
+        /** @var \Illuminate\Database\Eloquent\Builder<Course> $query */
+        $query = Course::query();
+        /** @var Course $result */
+        $result = $query->create($data);
+        return $result;
     }
 
     public function update(int $id, array $data): Course
@@ -45,32 +55,43 @@ class CourseRepository implements CourseRepositoryInterface
 
     public function hasSubscriptions(int $id): bool
     {
-        return Course::where('id', $id)
+        /** @var \Illuminate\Database\Eloquent\Builder $query */
+        $query = Course::query();
+        return $query->where('id', $id)
             ->whereHas('subscriptions')
             ->exists();
     }
 
     public function count(): int
     {
-        return Course::count();
+        /** @var \Illuminate\Database\Eloquent\Builder $query */
+        $query = Course::query();
+        return $query->count();
     }
 
     public function countPublished(): int
     {
-        return Course::where('status', CourseStatus::Published)->count();
+        /** @var \Illuminate\Database\Eloquent\Builder $query */
+        $query = Course::query();
+        return $query->where('status', CourseStatus::Published)->count();
     }
 
     public function getRecent(int $limit = 5): Collection
     {
-        return Course::with(['category', 'instructor'])
+        /** @var \Illuminate\Database\Eloquent\Builder $query */
+        $query = Course::query();
+        /** @var Collection $result */
+        $result = $query->with(['category', 'instructor'])
             ->latest()
             ->limit($limit)
             ->get();
+        return $result;
     }
 
     public function getInstructors(): Collection
     {
-        return User::where('role', UserRole::Instructor)->get();
+        /** @var \Illuminate\Database\Eloquent\Builder $query */
+        $query = User::query();
+        return $query->where('role', UserRole::Instructor)->get();
     }
 }
-
