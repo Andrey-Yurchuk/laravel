@@ -4,6 +4,7 @@ namespace App\Contracts\Services;
 
 use App\DTOs\CourseDTO;
 use App\Models\Course;
+use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -24,5 +25,7 @@ interface CourseServiceInterface
     public function countPublished(): int;
 
     public function getRecent(int $limit = 5): Collection;
+
+    public function getInstructors(): Collection;
 }
 
