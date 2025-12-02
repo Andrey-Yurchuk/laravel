@@ -30,6 +30,10 @@ class LoginController extends Controller
                 return redirect()->intended(route('admin.dashboard'));
             }
 
+            if ($user && $user->role === UserRole::Instructor) {
+                return redirect()->intended(route('instructor.dashboard'));
+            }
+
             return redirect()->intended(route('dashboard'));
         }
 
