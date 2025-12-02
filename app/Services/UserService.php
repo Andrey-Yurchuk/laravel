@@ -23,4 +23,3 @@ class UserService implements UserServiceInterface
         return $this->repository->create($data);
     }
 }
-

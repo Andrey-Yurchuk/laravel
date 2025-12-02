@@ -15,14 +15,18 @@ class UpdateInstructorCourseRequest extends FormRequest
 {
     public function authorize(): bool
     {
+        /** @var User|null $user */
         $user = Auth::user();
-        
+
         if (!$user || $user->role !== UserRole::Instructor) {
             return false;
         }
 
         $courseId = $this->route('course');
-        $course = Course::findOrFail($courseId);
+        /** @var \Illuminate\Database\Eloquent\Builder<Course> $query */
+        $query = Course::query();
+        /** @var Course $course */
+        $course = $query->findOrFail($courseId);
 
         return $this->user()->can('update', $course);
     }

@@ -8,4 +8,3 @@ interface UserServiceInterface
 {
     public function register(array $data): User;
 }
-

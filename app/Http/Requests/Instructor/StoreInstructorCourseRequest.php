@@ -16,7 +16,7 @@ class StoreInstructorCourseRequest extends FormRequest
     {
         /** @var User|null $user */
         $user = Auth::user();
-        
+
         if (!$user || $user->role !== UserRole::Instructor) {
             return false;
         }

@@ -12,7 +12,10 @@ Route::get('/', function () {
     return view('pages.home');
 })->name('home');
 
-Route::get('/register', [\App\Http\Controllers\Auth\RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::get('/register', [
+    \App\Http\Controllers\Auth\RegisterController::class,
+    'showRegistrationForm'
+])->name('register');
 
 Route::get('/faq', function () {
     return view('pages.faq');
