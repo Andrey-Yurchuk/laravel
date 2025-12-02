@@ -94,4 +94,23 @@ class CourseRepository implements CourseRepositoryInterface
         $query = User::query();
         return $query->where('role', UserRole::Instructor)->get();
     }
+
+    public function getByInstructorId(int $instructorId, int $perPage = 15): LengthAwarePaginator
+    {
+        /** @var \Illuminate\Database\Eloquent\Builder $query */
+        $query = Course::query();
+        return $query->with(['category', 'instructor'])
+            ->where('instructor_id', $instructorId)
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+    }
+
+    public function countPublishedByInstructorId(int $instructorId): int
+    {
+        /** @var \Illuminate\Database\Eloquent\Builder $query */
+        $query = Course::query();
+        return $query->where('instructor_id', $instructorId)
+            ->where('status', CourseStatus::Published)
+            ->count();
+    }
 }
