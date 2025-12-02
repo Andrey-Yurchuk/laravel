@@ -4,12 +4,16 @@ namespace App\Providers;
 
 use App\Contracts\Repositories\CategoryRepositoryInterface;
 use App\Contracts\Repositories\CourseRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Contracts\Services\CategoryServiceInterface;
 use App\Contracts\Services\CourseServiceInterface;
+use App\Contracts\Services\UserServiceInterface;
 use App\Repositories\CategoryRepository;
 use App\Repositories\CourseRepository;
+use App\Repositories\UserRepository;
 use App\Services\CategoryService;
 use App\Services\CourseService;
+use App\Services\UserService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,10 +26,12 @@ class AppServiceProvider extends ServiceProvider
         // Repositories
         $this->app->bind(CategoryRepositoryInterface::class, CategoryRepository::class);
         $this->app->bind(CourseRepositoryInterface::class, CourseRepository::class);
+        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
 
         // Services
         $this->app->bind(CategoryServiceInterface::class, CategoryService::class);
         $this->app->bind(CourseServiceInterface::class, CourseService::class);
+        $this->app->bind(UserServiceInterface::class, UserService::class);
     }
 
     /**
