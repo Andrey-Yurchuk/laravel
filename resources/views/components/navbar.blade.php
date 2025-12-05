@@ -21,9 +21,19 @@
             <!-- Кнопки действий -->
             <div class="flex items-center space-x-4">
                 @auth
-                    <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-indigo-600 transition font-medium">
-                        Дашборд
-                    </a>
+                    @if(auth()->user()->role === \App\Enums\UserRole::Admin)
+                        <a href="{{ route('admin.dashboard') }}" class="text-gray-700 hover:text-indigo-600 transition font-medium">
+                            Админ-панель
+                        </a>
+                    @elseif(auth()->user()->role === \App\Enums\UserRole::Instructor)
+                        <a href="{{ route('instructor.dashboard') }}" class="text-gray-700 hover:text-indigo-600 transition font-medium">
+                            Панель инструктора
+                        </a>
+                    @else
+                        <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-indigo-600 transition font-medium">
+                            Дашборд
+                        </a>
+                    @endif
                 @else
                     <a href="{{ route('register') }}" class="text-gray-700 hover:text-indigo-600 transition font-medium">
                         Войти

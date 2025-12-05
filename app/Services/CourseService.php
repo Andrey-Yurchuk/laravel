@@ -78,4 +78,14 @@ class CourseService implements CourseServiceInterface
     {
         return $this->repository->getInstructors();
     }
+
+    public function getByInstructorId(int $instructorId, int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->repository->getByInstructorId($instructorId, $perPage);
+    }
+
+    public function countPublishedByInstructorId(int $instructorId): int
+    {
+        return $this->repository->countPublishedByInstructorId($instructorId);
+    }
 }

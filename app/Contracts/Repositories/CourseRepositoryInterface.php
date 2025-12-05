@@ -28,4 +28,8 @@ interface CourseRepositoryInterface
     public function getRecent(int $limit = 5): Collection;
 
     public function getInstructors(): Collection;
+
+    public function getByInstructorId(int $instructorId, int $perPage = 15): LengthAwarePaginator;
+
+    public function countPublishedByInstructorId(int $instructorId): int;
 }
