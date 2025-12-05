@@ -51,11 +51,11 @@
         ],
         "test": [
             "@php artisan config:clear --ansi",
-            "@php artisan test"
+            "XDEBUG_MODE=off vendor/bin/phpunit"
         ],
         "test-coverage": [
             "@php artisan config:clear --ansi",
-            "XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-clover=coverage/clover.xml --coverage-text=coverage/coverage.txt"
+            "XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-clover=coverage/clover.xml --coverage-text"
         ],
         "test-coverage-html": [
             "@php artisan config:clear --ansi",
