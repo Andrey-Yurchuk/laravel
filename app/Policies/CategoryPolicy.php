@@ -33,4 +33,3 @@ class CategoryPolicy
         return $user->role === UserRole::Admin;
     }
 }
-
