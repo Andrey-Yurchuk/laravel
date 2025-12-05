@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pdo_pgsql \
     pgsql \
     redis \
-    pcntl
+    pcntl \
+    xdebug
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -25,7 +26,8 @@ RUN composer dump-autoload --optimize --classmap-authoritative
 
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
+    && chmod -R 755 /var/www/html/bootstrap/cache \
+    && git config --global --add safe.directory /var/www/html
 
 EXPOSE 80
 
