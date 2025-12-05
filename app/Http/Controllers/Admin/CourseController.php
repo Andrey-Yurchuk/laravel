@@ -83,6 +83,10 @@ class CourseController extends Controller
 
     public function destroy(int $id): RedirectResponse
     {
+        $course = $this->courseService->getById($id);
+        
+        $this->authorize('delete', $course);
+
         try {
             $this->courseService->delete($id);
             return redirect()->route('admin.courses.index')
