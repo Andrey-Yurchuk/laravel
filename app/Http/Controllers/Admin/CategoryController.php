@@ -76,6 +76,10 @@ class CategoryController extends Controller
 
     public function destroy(int $id): RedirectResponse
     {
+        $category = $this->categoryService->getById($id);
+
+        $this->authorize('delete', $category);
+
         try {
             $this->categoryService->delete($id);
             return redirect()->route('admin.categories.index')

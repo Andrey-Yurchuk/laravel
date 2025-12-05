@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
@@ -26,12 +25,8 @@ class LoginController extends Controller
 
             /** @var User|null $user */
             $user = Auth::user();
-            if ($user && $user->role === UserRole::Admin) {
-                return redirect()->intended(route('admin.dashboard'));
-            }
-
-            if ($user && $user->role === UserRole::Instructor) {
-                return redirect()->intended(route('instructor.dashboard'));
+            if ($user) {
+                return redirect()->intended(route($user->getDashboardRoute()));
             }
 
             return redirect()->intended(route('dashboard'));

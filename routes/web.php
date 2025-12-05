@@ -17,6 +17,11 @@ Route::get('/register', [
     'showRegistrationForm'
 ])->name('register');
 
+Route::post('/register', [
+    \App\Http\Controllers\Auth\RegisterController::class,
+    'register'
+]);
+
 Route::get('/faq', function () {
     return view('pages.faq');
 })->name('faq');
