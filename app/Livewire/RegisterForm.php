@@ -3,7 +3,6 @@
 namespace App\Livewire;
 
 use App\Contracts\Services\UserServiceInterface;
-use App\Enums\UserRole;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -62,17 +61,7 @@ class RegisterForm extends Component
         Auth::login($user);
         request()->session()->regenerate();
 
-        if ($user->role === UserRole::Admin) {
-            $this->redirect(route('admin.dashboard'));
-            return;
-        }
-
-        if ($user->role === UserRole::Instructor) {
-            $this->redirect(route('instructor.dashboard'));
-            return;
-        }
-
-        $this->redirect(route('dashboard'));
+        $this->redirect(route($user->getDashboardRoute()));
     }
 
     public function render(): View

@@ -57,4 +57,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(LearningProgress::class);
     }
+
+    public function getDashboardRoute(): string
+    {
+        return $this->role->getDashboardRoute();
+    }
 }

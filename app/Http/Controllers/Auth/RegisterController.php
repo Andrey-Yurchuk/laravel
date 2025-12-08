@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Contracts\Services\UserServiceInterface;
-use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use Illuminate\Contracts\View\View;
@@ -29,14 +28,6 @@ class RegisterController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        if ($user->role === UserRole::Admin) {
-            return redirect()->intended(route('admin.dashboard'));
-        }
-
-        if ($user->role === UserRole::Instructor) {
-            return redirect()->intended(route('instructor.dashboard'));
-        }
-
-        return redirect()->intended(route('dashboard'));
+        return redirect()->intended(route($user->getDashboardRoute()));
     }
 }

@@ -20,6 +20,8 @@
 /storage/pail
 /storage/debugbar
 /vendor
+/docs
+/coverage
 Homestead.json
 Homestead.yaml
 Thumbs.db
