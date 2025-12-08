@@ -31,7 +31,7 @@ class LoginTest extends TestCase
             'remember' => true,
         ]);
 
-        $this->assertAuthenticated();
+        $this->assertAuthenticatedAs($user);
         $response->assertRedirect(route('dashboard'));
     }
 
@@ -47,13 +47,13 @@ class LoginTest extends TestCase
             'password' => 'password123',
         ]);
 
-        $this->assertAuthenticated();
+        $this->assertAuthenticatedAs($user);
         $response->assertRedirect(route('dashboard'));
     }
 
     public function test_user_cannot_login_with_invalid_credentials(): void
     {
-        $user = User::factory()->create([
+        User::factory()->create([
             'email' => 'test@example.com',
             'password' => bcrypt('password123'),
         ]);

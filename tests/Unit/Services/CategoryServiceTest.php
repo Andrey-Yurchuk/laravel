@@ -9,102 +9,86 @@ use App\Services\CategoryService;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Mockery;
+use Mockery\MockInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class CategoryServiceTest extends TestCase
 {
+    /** @var MockInterface&CategoryRepositoryInterface */
+    private MockInterface $repository;
+    private CategoryService $service;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->repository = Mockery::mock(CategoryRepositoryInterface::class);
+        $this->service = new CategoryService($this->repository);
+    }
+
     public function test_get_all_delegates_to_repository(): void
     {
-        $repository = Mockery::mock(CategoryRepositoryInterface::class);
-        $service = new CategoryService($repository);
-
         $collection = new Collection();
 
-        $repository->shouldReceive('getAll')
+        $this->repository->shouldReceive('getAll')
             ->once()
             ->andReturn($collection);
 
-        $result = $service->getAll();
+        $result = $this->service->getAll();
 
         $this->assertInstanceOf(Collection::class, $result);
     }
 
     public function test_get_by_id_delegates_to_repository(): void
     {
-        $repository = Mockery::mock(CategoryRepositoryInterface::class);
-        $service = new CategoryService($repository);
-
         $category = new Category();
 
-        $repository->shouldReceive('getById')
+        $this->repository->shouldReceive('getById')
             ->once()
             ->with(1)
             ->andReturn($category);
 
-        $result = $service->getById(1);
+        $result = $this->service->getById(1);
 
         $this->assertInstanceOf(Category::class, $result);
     }
 
-    public function test_create_generates_slug_when_not_provided(): void
+    #[DataProvider('createSlugProvider')]
+    public function test_create_handles_slug_generation(string $inputSlug, string $expectedSlug): void
     {
-        $repository = Mockery::mock(CategoryRepositoryInterface::class);
-        $service = new CategoryService($repository);
-
         $dto = CategoryDTO::fromArray([
             'name' => 'Test Category Name',
-            'slug' => '',
+            'slug' => $inputSlug,
             'description' => 'Test description',
         ]);
 
         $category = new Category();
         $capturedData = null;
 
-        $repository->shouldReceive('create')
+        $this->repository->shouldReceive('create')
             ->once()
             ->andReturnUsing(function ($data) use (&$capturedData, $category) {
                 $capturedData = $data;
                 return $category;
             });
 
-        $service->create($dto);
+        $this->service->create($dto);
 
         $this->assertNotNull($capturedData);
-        $this->assertEquals('test-category-name', $capturedData['slug']);
+        $this->assertEquals($expectedSlug, $capturedData['slug']);
     }
 
-    public function test_create_does_not_generate_slug_when_provided(): void
+    /** @return array<string, array{0: string, 1: string}> */
+    public static function createSlugProvider(): array
     {
-        $repository = Mockery::mock(CategoryRepositoryInterface::class);
-        $service = new CategoryService($repository);
-
-        $dto = CategoryDTO::fromArray([
-            'name' => 'Test Category Name',
-            'slug' => 'custom-slug',
-            'description' => 'Test description',
-        ]);
-
-        $category = new Category();
-        $capturedData = null;
-
-        $repository->shouldReceive('create')
-            ->once()
-            ->andReturnUsing(function ($data) use (&$capturedData, $category) {
-                $capturedData = $data;
-                return $category;
-            });
-
-        $service->create($dto);
-
-        $this->assertNotNull($capturedData);
-        $this->assertEquals('custom-slug', $capturedData['slug']);
+        return [
+            'slug generated when empty' => ['', 'test-category-name'],
+            'slug kept when provided' => ['custom-slug', 'custom-slug'],
+        ];
     }
 
     public function test_update_generates_slug_when_not_provided(): void
     {
-        $repository = Mockery::mock(CategoryRepositoryInterface::class);
-        $service = new CategoryService($repository);
-
         $dto = CategoryDTO::fromArray([
             'name' => 'Updated Category Name',
             'slug' => '',
@@ -114,7 +98,7 @@ class CategoryServiceTest extends TestCase
         $category = new Category();
         $capturedData = null;
 
-        $repository->shouldReceive('update')
+        $this->repository->shouldReceive('update')
             ->once()
             ->with(1, Mockery::any())
             ->andReturnUsing(function ($id, $data) use (&$capturedData, $category) {
@@ -122,7 +106,7 @@ class CategoryServiceTest extends TestCase
                 return $category;
             });
 
-        $service->update(1, $dto);
+        $this->service->update(1, $dto);
 
         $this->assertNotNull($capturedData);
         $this->assertEquals('updated-category-name', $capturedData['slug']);
@@ -130,10 +114,7 @@ class CategoryServiceTest extends TestCase
 
     public function test_delete_throws_exception_when_category_has_courses(): void
     {
-        $repository = Mockery::mock(CategoryRepositoryInterface::class);
-        $service = new CategoryService($repository);
-
-        $repository->shouldReceive('hasCourses')
+        $this->repository->shouldReceive('hasCourses')
             ->once()
             ->with(1)
             ->andReturn(true);
@@ -141,33 +122,24 @@ class CategoryServiceTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Нельзя удалить категорию, в которой есть курсы');
 
-        $service->delete(1);
+        $this->service->delete(1);
     }
 
     public function test_delete_calls_repository_when_no_courses(): void
     {
-        $repository = Mockery::mock(CategoryRepositoryInterface::class);
-        $service = new CategoryService($repository);
-
-        $repository->shouldReceive('hasCourses')
+        $this->repository->shouldReceive('hasCourses')
             ->once()
             ->with(1)
             ->andReturn(false);
 
-        $repository->shouldReceive('delete')
+        $this->repository->shouldReceive('delete')
             ->once()
             ->with(1)
             ->andReturn(true);
 
-        $service->delete(1);
+        $this->service->delete(1);
 
         $this->assertTrue(true);
-    }
-
-    protected function tearDown(): void
-    {
-        Mockery::close();
-        parent::tearDown();
     }
 }
 

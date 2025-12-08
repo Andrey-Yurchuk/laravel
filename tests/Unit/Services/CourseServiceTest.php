@@ -11,54 +11,59 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator as Paginator;
 use Mockery;
+use Mockery\MockInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class CourseServiceTest extends TestCase
 {
+    /** @var MockInterface&CourseRepositoryInterface */
+    private MockInterface $repository;
+    private CourseService $service;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->repository = Mockery::mock(CourseRepositoryInterface::class);
+        $this->service = new CourseService($this->repository);
+    }
+
     public function test_get_all_delegates_to_repository(): void
     {
-        $repository = Mockery::mock(CourseRepositoryInterface::class);
-        $service = new CourseService($repository);
-
         $paginator = new Paginator([], 0, 15);
 
-        $repository->shouldReceive('getAll')
+        $this->repository->shouldReceive('getAll')
             ->once()
             ->with(15)
             ->andReturn($paginator);
 
-        $result = $service->getAll();
+        $result = $this->service->getAll();
 
         $this->assertInstanceOf(LengthAwarePaginator::class, $result);
     }
 
     public function test_get_by_id_delegates_to_repository(): void
     {
-        $repository = Mockery::mock(CourseRepositoryInterface::class);
-        $service = new CourseService($repository);
-
         $course = new Course();
 
-        $repository->shouldReceive('getById')
+        $this->repository->shouldReceive('getById')
             ->once()
             ->with(1)
             ->andReturn($course);
 
-        $result = $service->getById(1);
+        $result = $this->service->getById(1);
 
         $this->assertInstanceOf(Course::class, $result);
     }
 
-    public function test_create_generates_slug_when_not_provided(): void
+    #[DataProvider('createSlugProvider')]
+    public function test_create_handles_slug_generation(string $inputSlug, string $expectedSlug): void
     {
-        $repository = Mockery::mock(CourseRepositoryInterface::class);
-        $service = new CourseService($repository);
-
         $dto = CourseDTO::fromArray([
             'instructor_id' => 1,
             'category_id' => 1,
             'title' => 'Test Course Title',
-            'slug' => '',
+            'slug' => $inputSlug,
             'description' => 'Test description',
             'difficulty_level' => 'beginner',
             'status' => 'draft',
@@ -67,55 +72,30 @@ class CourseServiceTest extends TestCase
         $course = new Course();
         $capturedData = null;
 
-        $repository->shouldReceive('create')
+        $this->repository->shouldReceive('create')
             ->once()
             ->andReturnUsing(function ($data) use (&$capturedData, $course) {
                 $capturedData = $data;
                 return $course;
             });
 
-        $service->create($dto);
+        $this->service->create($dto);
 
         $this->assertNotNull($capturedData);
-        $this->assertEquals('test-course-title', $capturedData['slug']);
+        $this->assertEquals($expectedSlug, $capturedData['slug']);
     }
 
-    public function test_create_does_not_generate_slug_when_provided(): void
+    /** @return array<string, array{0: string, 1: string}> */
+    public static function createSlugProvider(): array
     {
-        $repository = Mockery::mock(CourseRepositoryInterface::class);
-        $service = new CourseService($repository);
-
-        $dto = CourseDTO::fromArray([
-            'instructor_id' => 1,
-            'category_id' => 1,
-            'title' => 'Test Course Title',
-            'slug' => 'custom-slug',
-            'description' => 'Test description',
-            'difficulty_level' => 'beginner',
-            'status' => 'draft',
-        ]);
-
-        $course = new Course();
-        $capturedData = null;
-
-        $repository->shouldReceive('create')
-            ->once()
-            ->andReturnUsing(function ($data) use (&$capturedData, $course) {
-                $capturedData = $data;
-                return $course;
-            });
-
-        $service->create($dto);
-
-        $this->assertNotNull($capturedData);
-        $this->assertEquals('custom-slug', $capturedData['slug']);
+        return [
+            'slug generated when empty' => ['', 'test-course-title'],
+            'slug kept when provided' => ['custom-slug', 'custom-slug'],
+        ];
     }
 
     public function test_update_generates_slug_when_not_provided(): void
     {
-        $repository = Mockery::mock(CourseRepositoryInterface::class);
-        $service = new CourseService($repository);
-
         $dto = CourseDTO::fromArray([
             'instructor_id' => 1,
             'category_id' => 1,
@@ -129,7 +109,7 @@ class CourseServiceTest extends TestCase
         $course = new Course();
         $capturedData = null;
 
-        $repository->shouldReceive('update')
+        $this->repository->shouldReceive('update')
             ->once()
             ->with(1, Mockery::any())
             ->andReturnUsing(function ($id, $data) use (&$capturedData, $course) {
@@ -137,7 +117,7 @@ class CourseServiceTest extends TestCase
                 return $course;
             });
 
-        $service->update(1, $dto);
+        $this->service->update(1, $dto);
 
         $this->assertNotNull($capturedData);
         $this->assertEquals('updated-course-title', $capturedData['slug']);
@@ -145,10 +125,7 @@ class CourseServiceTest extends TestCase
 
     public function test_delete_throws_exception_when_course_has_subscriptions(): void
     {
-        $repository = Mockery::mock(CourseRepositoryInterface::class);
-        $service = new CourseService($repository);
-
-        $repository->shouldReceive('hasSubscriptions')
+        $this->repository->shouldReceive('hasSubscriptions')
             ->once()
             ->with(1)
             ->andReturn(true);
@@ -156,65 +133,50 @@ class CourseServiceTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Нельзя удалить курс, на который есть подписки');
 
-        $service->delete(1);
+        $this->service->delete(1);
     }
 
     public function test_delete_calls_repository_when_no_subscriptions(): void
     {
-        $repository = Mockery::mock(CourseRepositoryInterface::class);
-        $service = new CourseService($repository);
-
-        $repository->shouldReceive('hasSubscriptions')
+        $this->repository->shouldReceive('hasSubscriptions')
             ->once()
             ->with(1)
             ->andReturn(false);
 
-        $repository->shouldReceive('delete')
+        $this->repository->shouldReceive('delete')
             ->once()
             ->with(1)
             ->andReturn(true);
 
-        $service->delete(1);
+        $this->service->delete(1);
 
         $this->assertTrue(true);
     }
 
     public function test_get_by_instructor_id_delegates_to_repository(): void
     {
-        $repository = Mockery::mock(CourseRepositoryInterface::class);
-        $service = new CourseService($repository);
-
         $paginator = new Paginator([], 0, 15);
 
-        $repository->shouldReceive('getByInstructorId')
+        $this->repository->shouldReceive('getByInstructorId')
             ->once()
             ->with(1, 15)
             ->andReturn($paginator);
 
-        $result = $service->getByInstructorId(1);
+        $result = $this->service->getByInstructorId(1);
 
         $this->assertInstanceOf(LengthAwarePaginator::class, $result);
     }
 
     public function test_count_published_by_instructor_id_delegates_to_repository(): void
     {
-        $repository = Mockery::mock(CourseRepositoryInterface::class);
-        $service = new CourseService($repository);
-
-        $repository->shouldReceive('countPublishedByInstructorId')
+        $this->repository->shouldReceive('countPublishedByInstructorId')
             ->once()
             ->with(1)
             ->andReturn(5);
 
-        $result = $service->countPublishedByInstructorId(1);
+        $result = $this->service->countPublishedByInstructorId(1);
 
         $this->assertEquals(5, $result);
-    }
-
-    protected function tearDown(): void
-    {
-        Mockery::close();
-        parent::tearDown();
     }
 }
 
