@@ -19,6 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
         if ($isRunningTests) {
             $middleware->validateCsrfTokens(except: ['*']);
         }
+
+        $middleware->alias([
+            'role' => \App\Http\Middleware\EnsureRole::class,
+            'subscription.active' => \App\Http\Middleware\EnsureActiveSubscription::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

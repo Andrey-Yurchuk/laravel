@@ -43,7 +43,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 });
 
 // Instructor routes
-Route::prefix('instructor')->name('instructor.')->middleware('auth')->group(function () {
+Route::prefix('instructor')->name('instructor.')->middleware(['auth', 'role:instructor'])->group(function () {
     Route::get('/', [InstructorController::class, 'index'])->name('dashboard');
     Route::resource('courses', InstructorCourseController::class);
 });
