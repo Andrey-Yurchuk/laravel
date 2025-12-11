@@ -3,6 +3,7 @@
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
+use Monolog\Handler\TelegramBotHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 
 return [
@@ -55,7 +56,17 @@ return [
         'stack' => [
             'driver' => 'stack',
             'channels' => explode(',', (string) env('LOG_STACK', 'single')),
-            'ignore_exceptions' => false,
+            'ignore_exceptions' => true,
+        ],
+
+        'telegram' => [
+            'driver' => 'monolog',
+            'level' => 'error',
+            'handler' => TelegramBotHandler::class,
+            'handler_with' => [
+                'apiKey' => env('LOG_TELEGRAM_TOKEN'),
+                'channel' => env('LOG_TELEGRAM_CHAT_ID'),
+            ],
         ],
 
         'single' => [
