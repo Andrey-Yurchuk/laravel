@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\Repositories\CategoryRepositoryInterface;
+use App\Contracts\Services\CacheServiceInterface;
 use App\Contracts\Services\CategoryServiceInterface;
 use App\DTOs\CategoryDTO;
 use App\Models\Category;
@@ -13,18 +14,23 @@ use Exception;
 class CategoryService implements CategoryServiceInterface
 {
     public function __construct(
-        private CategoryRepositoryInterface $repository
+        private CategoryRepositoryInterface $repository,
+        private CacheServiceInterface $cacheService
     ) {
     }
 
     public function getAll(): Collection
     {
-        return $this->repository->getAll();
+        return $this->cacheService->rememberCategoriesAll(function () {
+            return $this->repository->getAll();
+        });
     }
 
     public function getById(int $id): Category
     {
-        return $this->repository->getById($id);
+        return $this->cacheService->rememberCategory($id, function () use ($id) {
+            return $this->repository->getById($id);
+        });
     }
 
     public function create(CategoryDTO $dto): Category
@@ -35,7 +41,11 @@ class CategoryService implements CategoryServiceInterface
             $data['slug'] = Str::slug($data['name']);
         }
 
-        return $this->repository->create($data);
+        $category = $this->repository->create($data);
+
+        $this->cacheService->forgetCategoryCache($category->id);
+
+        return $category;
     }
 
     public function update(int $id, CategoryDTO $dto): Category
@@ -46,7 +56,11 @@ class CategoryService implements CategoryServiceInterface
             $data['slug'] = Str::slug($data['name']);
         }
 
-        return $this->repository->update($id, $data);
+        $category = $this->repository->update($id, $data);
+
+        $this->cacheService->forgetCategoryCache($id);
+
+        return $category;
     }
 
     public function delete(int $id): void
@@ -56,10 +70,14 @@ class CategoryService implements CategoryServiceInterface
         }
 
         $this->repository->delete($id);
+
+        $this->cacheService->forgetCategoryCache($id);
     }
 
     public function count(): int
     {
-        return $this->repository->count();
+        return $this->cacheService->rememberCategoriesCount(function () {
+            return $this->repository->count();
+        });
     }
 }
