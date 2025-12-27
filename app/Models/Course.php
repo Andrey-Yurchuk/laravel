@@ -4,6 +4,9 @@ namespace App\Models;
 
 use App\Enums\CourseDifficulty;
 use App\Enums\CourseStatus;
+use App\Events\CourseCreated;
+use App\Events\CourseDeleted;
+use App\Events\CourseUpdated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -34,6 +37,21 @@ class Course extends Model
             'difficulty_level' => CourseDifficulty::class,
             'status' => CourseStatus::class,
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::created(function ($course) {
+            event(new CourseCreated($course));
+        });
+
+        static::updated(function ($course) {
+            event(new CourseUpdated($course));
+        });
+
+        static::deleted(function ($course) {
+            event(new CourseDeleted($course));
+        });
     }
 
     public function instructor(): BelongsTo
