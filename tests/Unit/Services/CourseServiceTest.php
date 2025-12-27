@@ -3,6 +3,7 @@
 namespace Tests\Unit\Services;
 
 use App\Contracts\Repositories\CourseRepositoryInterface;
+use App\Contracts\Services\CacheServiceInterface;
 use App\DTOs\CourseDTO;
 use App\Models\Course;
 use App\Services\CourseService;
@@ -19,13 +20,16 @@ class CourseServiceTest extends TestCase
 {
     /** @var MockInterface&CourseRepositoryInterface */
     private MockInterface $repository;
+    /** @var MockInterface&CacheServiceInterface */
+    private MockInterface $cacheService;
     private CourseService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->repository = Mockery::mock(CourseRepositoryInterface::class);
-        $this->service = new CourseService($this->repository);
+        $this->cacheService = Mockery::mock(CacheServiceInterface::class);
+        $this->service = new CourseService($this->repository, $this->cacheService);
     }
 
     public function test_get_all_delegates_to_repository(): void
@@ -42,18 +46,24 @@ class CourseServiceTest extends TestCase
         $this->assertInstanceOf(LengthAwarePaginator::class, $result);
     }
 
-    public function test_get_by_id_delegates_to_repository(): void
+    public function test_get_by_id_uses_cache_service(): void
     {
         $course = new Course();
 
-        $this->repository->shouldReceive('getById')
+        $this->cacheService->shouldReceive('rememberCourse')
             ->once()
-            ->with(1)
-            ->andReturn($course);
+            ->andReturnUsing(function ($id, $callback) use ($course) {
+                $this->repository->shouldReceive('getById')
+                    ->once()
+                    ->with($id)
+                    ->andReturn($course);
+                return $callback();
+            });
 
         $result = $this->service->getById(1);
 
         $this->assertInstanceOf(Course::class, $result);
+        $this->assertSame($course, $result);
     }
 
     #[DataProvider('createSlugProvider')]
@@ -72,12 +82,19 @@ class CourseServiceTest extends TestCase
         $course = new Course();
         $capturedData = null;
 
+        $course->id = 1;
+        $course->instructor_id = 1;
+
         $this->repository->shouldReceive('create')
             ->once()
             ->andReturnUsing(function ($data) use (&$capturedData, $course) {
                 $capturedData = $data;
                 return $course;
             });
+
+        $this->cacheService->shouldReceive('forgetCourseCache')
+            ->once()
+            ->with(1, 1);
 
         $this->service->create($dto);
 
@@ -109,6 +126,8 @@ class CourseServiceTest extends TestCase
         $course = new Course();
         $capturedData = null;
 
+        $course->instructor_id = 1;
+
         $this->repository->shouldReceive('update')
             ->once()
             ->with(1, Mockery::any())
@@ -116,6 +135,10 @@ class CourseServiceTest extends TestCase
                 $capturedData = $data;
                 return $course;
             });
+
+        $this->cacheService->shouldReceive('forgetCourseCache')
+            ->once()
+            ->with(1, 1);
 
         $this->service->update(1, $dto);
 
@@ -138,15 +161,28 @@ class CourseServiceTest extends TestCase
 
     public function test_delete_calls_repository_when_no_subscriptions(): void
     {
+        $course = new Course();
+        $course->id = 1;
+        $course->instructor_id = 1;
+
         $this->repository->shouldReceive('hasSubscriptions')
             ->once()
             ->with(1)
             ->andReturn(false);
 
+        $this->repository->shouldReceive('getById')
+            ->once()
+            ->with(1)
+            ->andReturn($course);
+
         $this->repository->shouldReceive('delete')
             ->once()
             ->with(1)
             ->andReturn(true);
+
+        $this->cacheService->shouldReceive('forgetCourseCache')
+            ->once()
+            ->with(1, 1);
 
         $this->service->delete(1);
 
@@ -167,14 +203,21 @@ class CourseServiceTest extends TestCase
         $this->assertInstanceOf(LengthAwarePaginator::class, $result);
     }
 
-    public function test_count_published_by_instructor_id_delegates_to_repository(): void
+    public function test_count_published_by_instructor_id_uses_cache_service(): void
     {
-        $this->repository->shouldReceive('countPublishedByInstructorId')
+        $this->cacheService->shouldReceive('rememberCoursesCountPublishedByInstructor')
             ->once()
-            ->with(1)
-            ->andReturn(5);
+            ->andReturnUsing(function ($instructorId, $callback) {
+                $this->repository->shouldReceive('countPublishedByInstructorId')
+                    ->once()
+                    ->with($instructorId)
+                    ->andReturn(5);
+                return $callback();
+            });
 
         $result = $this->service->countPublishedByInstructorId(1);
+
+        $this->assertEquals(5, $result);
 
         $this->assertEquals(5, $result);
     }

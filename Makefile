@@ -1,4 +1,4 @@
-.PHONY: phpstan phpcs quality test test-coverage clear-cache restart
+.PHONY: phpstan phpcs quality test test-coverage clear-cache warm-cache restart
 
 phpstan:
 	docker-compose exec app composer analyse
@@ -21,6 +21,9 @@ clear-cache:
 	docker-compose exec app php artisan route:clear
 	docker-compose exec app php artisan view:clear
 	docker-compose exec app php artisan optimize:clear
+
+warm-cache:
+	docker-compose exec app php artisan cache:warm
 
 restart:
 	docker-compose exec app php artisan octane:reload
