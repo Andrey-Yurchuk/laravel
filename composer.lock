@@ -4,8 +4,45 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "48da6cb58b7fac98aa083ed35c12d94e",
+    "content-hash": "92b1540aa5ae4899f026caf39ec5f3f6",
     "packages": [
+        {
+            "name": "andrey-yurchuk/password-generator",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Andrey-Yurchuk/password-generator.git",
+                "reference": "9314dd1e892c57e16ce4c3377542f695a11ad28d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Andrey-Yurchuk/password-generator/zipball/9314dd1e892c57e16ce4c3377542f695a11ad28d",
+                "reference": "9314dd1e892c57e16ce4c3377542f695a11ad28d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "AndreyYurchuk\\PasswordGenerator\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Andrey Yurchuk",
+                    "email": "r1430@tut.by"
+                }
+            ],
+            "description": "Random password generator library",
+            "support": {
+                "issues": "https://github.com/Andrey-Yurchuk/password-generator/issues",
+                "source": "https://github.com/Andrey-Yurchuk/password-generator/tree/1.0.1"
+            },
+            "time": "2025-05-17T08:18:11+00:00"
+        },
         {
             "name": "brick/math",
             "version": "0.14.0",
