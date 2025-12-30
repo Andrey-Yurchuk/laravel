@@ -3,6 +3,7 @@
 namespace Tests\Unit\Services;
 
 use App\Contracts\Repositories\CategoryRepositoryInterface;
+use App\Contracts\Services\CacheServiceInterface;
 use App\DTOs\CategoryDTO;
 use App\Models\Category;
 use App\Services\CategoryService;
@@ -17,40 +18,55 @@ class CategoryServiceTest extends TestCase
 {
     /** @var MockInterface&CategoryRepositoryInterface */
     private MockInterface $repository;
+    /** @var MockInterface&CacheServiceInterface */
+    private MockInterface $cacheService;
     private CategoryService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->repository = Mockery::mock(CategoryRepositoryInterface::class);
-        $this->service = new CategoryService($this->repository);
+        $this->cacheService = Mockery::mock(CacheServiceInterface::class);
+        $this->service = new CategoryService($this->repository, $this->cacheService);
     }
 
-    public function test_get_all_delegates_to_repository(): void
+    public function test_get_all_uses_cache_service(): void
     {
         $collection = new Collection();
 
-        $this->repository->shouldReceive('getAll')
+        $this->cacheService->shouldReceive('rememberCategoriesAll')
             ->once()
-            ->andReturn($collection);
+            ->andReturnUsing(function ($callback) use ($collection) {
+                $this->repository->shouldReceive('getAll')
+                    ->once()
+                    ->andReturn($collection);
+                return $callback();
+            });
 
         $result = $this->service->getAll();
 
         $this->assertInstanceOf(Collection::class, $result);
+        $this->assertSame($collection, $result);
     }
 
-    public function test_get_by_id_delegates_to_repository(): void
+    public function test_get_by_id_uses_cache_service(): void
     {
         $category = new Category();
 
-        $this->repository->shouldReceive('getById')
+        $this->cacheService->shouldReceive('rememberCategory')
             ->once()
-            ->with(1)
-            ->andReturn($category);
+            ->andReturnUsing(function ($id, $callback) use ($category) {
+                $this->repository->shouldReceive('getById')
+                    ->once()
+                    ->with($id)
+                    ->andReturn($category);
+                return $callback();
+            });
 
         $result = $this->service->getById(1);
 
         $this->assertInstanceOf(Category::class, $result);
+        $this->assertSame($category, $result);
     }
 
     #[DataProvider('createSlugProvider')]
@@ -71,6 +87,10 @@ class CategoryServiceTest extends TestCase
                 $capturedData = $data;
                 return $category;
             });
+
+        $this->cacheService->shouldReceive('forgetCategoryCache')
+            ->once()
+            ->with(null);
 
         $this->service->create($dto);
 
@@ -106,6 +126,10 @@ class CategoryServiceTest extends TestCase
                 return $category;
             });
 
+        $this->cacheService->shouldReceive('forgetCategoryCache')
+            ->once()
+            ->with(1);
+
         $this->service->update(1, $dto);
 
         $this->assertNotNull($capturedData);
@@ -136,6 +160,10 @@ class CategoryServiceTest extends TestCase
             ->once()
             ->with(1)
             ->andReturn(true);
+
+        $this->cacheService->shouldReceive('forgetCategoryCache')
+            ->once()
+            ->with(1);
 
         $this->service->delete(1);
 
