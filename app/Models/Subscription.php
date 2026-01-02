@@ -8,6 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property int $course_id
+ * @property int $plan_id
+ * @property SubscriptionStatus $status
+ * @property \Carbon\Carbon|null $current_period_start
+ * @property \Carbon\Carbon|null $current_period_end
+ * @property \Carbon\Carbon|null $cancelled_at
+ * @property-read User $user
+ * @property-read Course $course
+ * @property-read CoursePlan $plan
+ */
 class Subscription extends Model
 {
     use HasFactory;
