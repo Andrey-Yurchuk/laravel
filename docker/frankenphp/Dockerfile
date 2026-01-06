@@ -3,6 +3,7 @@ FROM dunglas/frankenphp:php8.4
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     unzip \
+    supervisor \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && install-php-extensions \
     zip \
@@ -10,6 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pgsql \
     redis \
     pcntl \
+    sockets \
     xdebug
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -27,6 +29,7 @@ RUN composer dump-autoload --optimize --classmap-authoritative
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache \
+    && mkdir -p /var/log/supervisor \
     && git config --global --add safe.directory /var/www/html
 
 EXPOSE 80
