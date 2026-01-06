@@ -17,9 +17,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property \Carbon\Carbon|null $current_period_start
  * @property \Carbon\Carbon|null $current_period_end
  * @property \Carbon\Carbon|null $cancelled_at
- * @property-read User $user
- * @property-read Course $course
- * @property-read CoursePlan $plan
+ * @property-read User|null $user
+ * @property-read Course|null $course
+ * @property-read CoursePlan|null $plan
  */
 class Subscription extends Model
 {
