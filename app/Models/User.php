@@ -10,7 +10,12 @@ use Illuminate\Notifications\Notifiable;
 
 /**
  * @property int $id
+ * @property string $name
+ * @property string $email
  * @property UserRole $role
+ * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
  */
 class User extends Authenticatable
 {

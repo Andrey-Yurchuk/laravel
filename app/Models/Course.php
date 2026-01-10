@@ -16,6 +16,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $id
  * @property int $instructor_id
  * @property int $category_id
+ * @property string $title
+ * @property string $slug
+ * @property string|null $description
+ * @property CourseDifficulty $difficulty_level
+ * @property CourseStatus $status
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ * @property-read User $instructor
+ * @property-read Category $category
  */
 class Course extends Model
 {

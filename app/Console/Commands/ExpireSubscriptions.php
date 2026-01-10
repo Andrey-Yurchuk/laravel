@@ -64,7 +64,9 @@ class ExpireSubscriptions extends Command
 
                 $courseTitle = $subscription->course?->title ?? 'не указано';
                 $userEmail = $subscription->user?->email ?? 'не указано';
-                $expiredDate = $subscription->current_period_end?->format('Y-m-d') ?? 'не указано';
+                $expiredDate = ($subscription->current_period_end !== null)
+                    ? $subscription->current_period_end->format('Y-m-d')
+                    : 'не указано';
 
                 $statusMark = $isDryRun ? "[БУДЕТ ОБНОВЛЕНО]" : "[ОБНОВЛЕНО]";
                 $this->line("  {$statusMark} Подписка #{$subscription->id} " .
