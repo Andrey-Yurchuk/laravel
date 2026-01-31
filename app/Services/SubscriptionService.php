@@ -151,4 +151,3 @@ class SubscriptionService implements SubscriptionServiceInterface
         return $lastSubscription ? $lastSubscription->id + 1 : 1;
     }
 }
-
