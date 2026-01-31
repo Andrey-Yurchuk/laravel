@@ -20,6 +20,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read User|null $user
  * @property-read Course|null $course
  * @property-read CoursePlan|null $plan
+ *
+ * @method static self|null find($id)
+ * @method static \Illuminate\Database\Eloquent\Builder where(...$parameters)
+ * @method static self updateOrCreate(array $attributes, array $values = [])
+ * @method static int destroy($ids)
  */
 class Subscription extends Model
 {
