@@ -2,8 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Contracts\Services\SubscriptionServiceInterface;
+use App\Domain\ValueObjects\SubscriptionId;
 use App\Enums\SubscriptionStatus;
-use App\Models\Subscription;
+use App\Models\Subscription as SubscriptionModel;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
@@ -17,6 +19,12 @@ class ExpireSubscriptions extends Command
     protected $description = 'Обработка истекших подписок: обновление статуса на expired '
         . 'для подписок с истекшим сроком действия';
 
+    public function __construct(
+        private readonly SubscriptionServiceInterface $subscriptionService
+    ) {
+        parent::__construct();
+    }
+
     public function handle(): int
     {
         $this->info('Обработка истекших подписок...');
@@ -28,8 +36,8 @@ class ExpireSubscriptions extends Command
             $this->warn('[DRY RUN MODE] Подписки не будут изменены');
         }
 
-        /** @var \Illuminate\Database\Eloquent\Builder<Subscription> $query */
-        $query = Subscription::query()
+        /** @var \Illuminate\Database\Eloquent\Builder<SubscriptionModel> $query */
+        $query = SubscriptionModel::query()
             ->where('status', SubscriptionStatus::Active)
             ->where('current_period_end', '<', Carbon::now())
             ->whereNotNull('current_period_end');
@@ -48,28 +56,26 @@ class ExpireSubscriptions extends Command
             $this->info("Обрабатывается первые {$limit} подписок...");
         }
 
-        /** @var \Illuminate\Database\Eloquent\Collection<int, Subscription> $subscriptions */
-        $subscriptions = $query->with(['course', 'user'])->get();
+        $models = $query->with(['course', 'user'])->get();
         $processedCount = 0;
         $errorCount = 0;
 
-        /** @var Subscription $subscription */
-        foreach ($subscriptions as $subscription) {
+        foreach ($models as $model) {
             try {
                 if (!$isDryRun) {
-                    $subscription->update([
-                        'status' => SubscriptionStatus::Expired,
-                    ]);
+                    $this->subscriptionService->expireSubscription(
+                        new SubscriptionId($model->id)
+                    );
                 }
 
-                $courseTitle = $subscription->course?->title ?? 'не указано';
-                $userEmail = $subscription->user?->email ?? 'не указано';
-                $expiredDate = ($subscription->current_period_end !== null)
-                    ? $subscription->current_period_end->format('Y-m-d')
+                $courseTitle = $model->course?->title ?? 'не указано';
+                $userEmail = $model->user?->email ?? 'не указано';
+                $expiredDate = ($model->current_period_end !== null)
+                    ? $model->current_period_end->format('Y-m-d')
                     : 'не указано';
 
                 $statusMark = $isDryRun ? "[БУДЕТ ОБНОВЛЕНО]" : "[ОБНОВЛЕНО]";
-                $this->line("  {$statusMark} Подписка #{$subscription->id} " .
+                $this->line("  {$statusMark} Подписка #{$model->id} " .
                     ($isDryRun ? "будет обновлена" : "обновлена") .
                     " (Курс: \"{$courseTitle}\", " .
                     "Пользователь: {$userEmail}, " .
@@ -77,7 +83,7 @@ class ExpireSubscriptions extends Command
 
                 $processedCount++;
             } catch (Exception $e) {
-                $this->error("  [ОШИБКА] Подписка #{$subscription->id}: " . $e->getMessage());
+                $this->error("  [ОШИБКА] Подписка #{$model->id}: " . $e->getMessage());
                 $errorCount++;
             }
         }
