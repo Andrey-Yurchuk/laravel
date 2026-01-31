@@ -11,15 +11,18 @@ final readonly class CourseTitle
     public function __construct(string $value)
     {
         $trimmedValue = trim($value);
-        
+
         if (empty($trimmedValue)) {
             throw new InvalidArgumentException("Course title cannot be empty");
         }
-        
+
         if (mb_strlen($trimmedValue, 'UTF-8') > 255) {
-            throw new InvalidArgumentException("Course title cannot exceed 255 characters, got: " . mb_strlen($trimmedValue, 'UTF-8'));
+            $length = mb_strlen($trimmedValue, 'UTF-8');
+            throw new InvalidArgumentException(
+                "Course title cannot exceed 255 characters, got: {$length}"
+            );
         }
-        
+
         $this->value = $trimmedValue;
     }
 

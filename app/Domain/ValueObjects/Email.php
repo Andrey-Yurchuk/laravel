@@ -11,15 +11,15 @@ final readonly class Email
     public function __construct(string $value)
     {
         $trimmedValue = trim($value);
-        
+
         if (empty($trimmedValue)) {
             throw new InvalidArgumentException("Email cannot be empty");
         }
-        
+
         if (!filter_var($trimmedValue, FILTER_VALIDATE_EMAIL)) {
             throw new InvalidArgumentException("Invalid email format: {$trimmedValue}");
         }
-        
+
         $this->value = $trimmedValue;
     }
 

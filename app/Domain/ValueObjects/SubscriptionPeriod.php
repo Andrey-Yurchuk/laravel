@@ -13,7 +13,9 @@ final readonly class SubscriptionPeriod
     ) {
         if ($start >= $end) {
             throw new InvalidArgumentException(
-                "Start date must be before end date. Start: {$start->format('Y-m-d H:i:s')}, End: {$end->format('Y-m-d H:i:s')}"
+                "Start date must be before end date. "
+                . "Start: {$start->format('Y-m-d H:i:s')}, "
+                . "End: {$end->format('Y-m-d H:i:s')}"
             );
         }
     }
@@ -38,7 +40,7 @@ final readonly class SubscriptionPeriod
         if ($now > $this->end) {
             return 0;
         }
-        
+
         $diff = $this->end->diff($now);
         return (int) $diff->days;
     }
@@ -51,7 +53,7 @@ final readonly class SubscriptionPeriod
 
     public function equals(SubscriptionPeriod $other): bool
     {
-        return $this->start->getTimestamp() === $other->start->getTimestamp() 
+        return $this->start->getTimestamp() === $other->start->getTimestamp()
             && $this->end->getTimestamp() === $other->end->getTimestamp();
     }
 }

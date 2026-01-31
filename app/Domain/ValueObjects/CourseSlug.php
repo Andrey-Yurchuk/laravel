@@ -10,15 +10,18 @@ final readonly class CourseSlug
         private string $value
     ) {
         $value = trim($value);
-        
+
         if (empty($value)) {
             throw new InvalidArgumentException("Course slug cannot be empty");
         }
-        
+
         if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $value)) {
-            throw new InvalidArgumentException("Invalid slug format: {$value}. Slug must contain only lowercase letters, numbers, and hyphens");
+            throw new InvalidArgumentException(
+                "Invalid slug format: {$value}. "
+                . "Slug must contain only lowercase letters, numbers, and hyphens"
+            );
         }
-        
+
         if (mb_strlen($value, 'UTF-8') > 255) {
             throw new InvalidArgumentException("Course slug cannot exceed 255 characters");
         }
