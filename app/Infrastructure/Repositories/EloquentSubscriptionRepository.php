@@ -11,24 +11,43 @@ use App\Domain\ValueObjects\PlanId;
 use App\Domain\ValueObjects\SubscriptionPeriod;
 use App\Enums\SubscriptionStatus;
 use App\Models\Subscription as SubscriptionModel;
+use Carbon\Carbon;
 use DateTimeImmutable;
 
 class EloquentSubscriptionRepository implements SubscriptionRepositoryInterface
 {
     public function save(Subscription $subscription): void
     {
-        SubscriptionModel::updateOrCreate(
-            ['id' => $subscription->id()->value()],
-            [
+        $model = SubscriptionModel::find($subscription->id()->value());
+
+        $periodStart = Carbon::instance($subscription->period()->start());
+        $periodEnd = Carbon::instance($subscription->period()->end());
+        $cancelledAt = $subscription->cancelledAt()
+            ? Carbon::instance($subscription->cancelledAt())
+            : null;
+
+        if ($model) {
+            $model->update([
                 'user_id' => $subscription->userId()->value(),
                 'course_id' => $subscription->courseId()->value(),
                 'plan_id' => $subscription->planId()->value(),
                 'status' => $subscription->status(),
-                'current_period_start' => $subscription->period()->start(),
-                'current_period_end' => $subscription->period()->end(),
-                'cancelled_at' => $subscription->cancelledAt(),
-            ]
-        );
+                'current_period_start' => $periodStart,
+                'current_period_end' => $periodEnd,
+                'cancelled_at' => $cancelledAt,
+            ]);
+        } else {
+            $model = new SubscriptionModel();
+            $model->id = $subscription->id()->value();
+            $model->user_id = $subscription->userId()->value();
+            $model->course_id = $subscription->courseId()->value();
+            $model->plan_id = $subscription->planId()->value();
+            $model->status = $subscription->status();
+            $model->current_period_start = $periodStart;
+            $model->current_period_end = $periodEnd;
+            $model->cancelled_at = $cancelledAt;
+            $model->save();
+        }
     }
 
     public function findById(SubscriptionId $id): ?Subscription
