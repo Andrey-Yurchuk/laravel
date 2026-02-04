@@ -15,4 +15,14 @@ class UserRepository implements UserRepositoryInterface
         $result = $query->create($data);
         return $result;
     }
+
+    public function findByEmail(string $email): ?User
+    {
+        /** @var \Illuminate\Database\Eloquent\Builder<User> $query */
+        $query = User::query();
+        /** @var User|null $result */
+        $result = $query->where('email', $email)->first();
+
+        return $result;
+    }
 }
