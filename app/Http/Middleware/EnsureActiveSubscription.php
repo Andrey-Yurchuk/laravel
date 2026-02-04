@@ -2,10 +2,11 @@
 
 namespace App\Http\Middleware;
 
-use App\Enums\SubscriptionStatus;
+use App\Contracts\Services\SubscriptionServiceInterface;
+use App\Domain\ValueObjects\CourseId;
+use App\Domain\ValueObjects\UserId;
 use App\Models\Course;
 use App\Models\Lesson;
-use App\Models\Subscription;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureActiveSubscription
 {
+    public function __construct(
+        private readonly SubscriptionServiceInterface $subscriptionService
+    ) {
+    }
+
     public function handle(Request $request, Closure $next): Response|RedirectResponse
     {
         $user = $request->user();
@@ -29,16 +35,10 @@ class EnsureActiveSubscription
             abort(Response::HTTP_BAD_REQUEST, 'Не удалось определить курс для проверки подписки.');
         }
 
-        $hasActiveSubscription = Subscription::query()
-            ->where('user_id', $user->id)
-            ->where('course_id', $courseId)
-            ->where('status', SubscriptionStatus::Active)
-            ->where(function ($query) {
-                $query
-                    ->whereNull('current_period_end')
-                    ->orWhere('current_period_end', '>=', now());
-            })
-            ->exists();
+        $hasActiveSubscription = $this->subscriptionService->hasActiveSubscription(
+            new UserId($user->id),
+            new CourseId($courseId)
+        );
 
         if (! $hasActiveSubscription) {
             abort(Response::HTTP_FORBIDDEN, 'Требуется активная подписка для доступа к материалам курса.');
